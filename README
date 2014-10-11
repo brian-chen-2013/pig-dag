@@ -1,0 +1,25 @@
+Apache Pig是基于Hadoop的并行数据流处理开源引擎。Pig支持DAG，并且在执行流程上做了不少优化，但做控制流结构，需要使用其他语言支持，如jython，也就是Python的JVM实现。
+
+Pig-DAG是基于Pig的有向无环图Directed Acyclic Graph执行引擎。
+
+Pig-DAG提供另一种形式的DAG计算。Pig-DAG是以pig脚本为一个执行单元，每一个Pig脚本是一个任务，成功执行后，子任务开始执行，如此循环，就形成一个DAG结构。
+
+Pig-DAG只需要cpython即可执行，不需要安装jython。
+
+优点：
+1. 以Pig脚本为执行单元，粒度更大，便于调试和开发。
+2. 任务脚本写在tasks.py，可以任意定制多个task，只要不出现cyclic结构即可。Pig-DAG提供cyclic结构检测功能。
+3. tasks.py脚本，可以支持单点DAG，支持多子节点任务，支持多父节点任务，可以支持多个root节点并存，支持多个树结构并存。
+4. Pig-DAG支持多线程并发执行任务。
+
+
+运行须知：
+1. Pig-DAG在hadoop 2.5 + pig 0.13 + python2.7调试运行成功。
+2. 系统需安装Hadoop和pig，请确认hadoop-x.x.x/bin目录已经加入到PATH，也就是说，在命令行执行'hdfs dfs -ls /'能成功。
+3. 每个pig脚本的数据，可以是多出口，但至少有一个数据存储在task名的目录，比如，task名称是'test'，其对应的pig脚本x.pig被执行，最后结果至少有一个是写入到目录'test'，形如store resule_data into 'test'。这个目录的作用是，它的子节点根据task目录的情况确认是否执行。为了保证脚本已经执行完毕，这个store动作建议是脚本的最后一条语句。
+4. 除此之外，每个脚本的功能没有任何其他限制。
+
+
+运行测试：
+1. python test/t1.py，最简单demo。两个任务，一个是父节点，一个子节点。
+2. 在core目录下，有多个tasks的demo，将它们分别更名为tasks.py，然后运行'python test/t1.py'即可。
